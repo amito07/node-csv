@@ -3,7 +3,9 @@ import bcrypt, { hash } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import csvtojson from 'csvtojson';
-import path from 'path';
+import converter from 'json-2-csv';
+import fs from 'fs-extra';
+import path from "path";
 
 dotenv.config();
 
@@ -83,4 +85,30 @@ export const createBulkUser = async(req,res)=>{
     })
 
 
+}
+
+export const exportToCsvUser = async(req,res)=>{
+    try {
+        const userJsonData = await userModel.findAll({raw:true})
+        
+        converter.json2csv(userJsonData,(err,csv)=>{
+            if(err){
+                throw err;
+            }else{
+                fs.outputFile('CsvFolder/users.csv', csv, err => {
+                    if(err) {
+                      console.log(err);
+                    } else {
+                      console.log('The file was saved!');
+                    }
+                  })
+            }
+
+        })
+        res.send(userJsonData)
+
+        
+    } catch (error) {
+        console.log(error)
+    }
 }
